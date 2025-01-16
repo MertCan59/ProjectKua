@@ -38,10 +38,14 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Input")
 	UInputAction* LookingAction;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Input")
+	UInputAction* Interaction;
 	
 	//** CALLBACKS FOR INPUTS **//
-	void Move(const FInputActionValue& value);
-	void Look(const FInputActionValue& value);
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
+	void Interact(const FInputActionValue& Value);
 
 	//** CAMERA PROPERTIES **//
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Camera Properties")
@@ -58,3 +62,5 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* ViewCamera;
 };
+
+

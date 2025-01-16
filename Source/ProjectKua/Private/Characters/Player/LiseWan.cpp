@@ -62,14 +62,15 @@ void ALiseWan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	{
 		EnchancedComponent->BindAction(MovementAction,ETriggerEvent::Triggered,this,&ALiseWan::Move);
 		EnchancedComponent->BindAction(LookingAction,ETriggerEvent::Triggered,this,&ALiseWan::Look);
+		EnchancedComponent->BindAction(Interaction,ETriggerEvent::Started,this,&ALiseWan::Interact);
 	}
 }
 
-void ALiseWan::Move(const FInputActionValue& value)
+void ALiseWan::Move(const FInputActionValue& Value)
 {
 	if (CharacterState!=ECharacterState::ECS_Notinteracted)return;
 	
-	const auto MovementVector=value.Get<FVector2D>();
+	const auto MovementVector=Value.Get<FVector2D>();
 	const auto Rotation=Controller->GetControlRotation();
 
 	const FRotator YawRotation(0.f,Rotation.Yaw,0.f);
@@ -87,9 +88,9 @@ void ALiseWan::Move(const FInputActionValue& value)
 	}
 }
 
-void ALiseWan::Look(const FInputActionValue& value)
+void ALiseWan::Look(const FInputActionValue& Value)
 {
-	const auto LookAxisVector=value.Get<FVector2D>();
+	const auto LookAxisVector=Value.Get<FVector2D>();
 
 	if (Controller!=nullptr && LookAxisVector.X!=0)
 	{
@@ -98,5 +99,13 @@ void ALiseWan::Look(const FInputActionValue& value)
 	if (Controller!=nullptr && LookAxisVector.Y!=0)
 	{
 		AddControllerPitchInput(LookAxisVector.Y);
+	}
+}
+void ALiseWan::Interact(const FInputActionValue& Value)
+{
+	if (GEngine)
+	{
+		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Interacting");
+		
 	}
 }
