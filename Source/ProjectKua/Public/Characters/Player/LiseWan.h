@@ -3,13 +3,17 @@
 #pragma once
 
 #include "CoreMinimal.h"
+#include "Characters/CharacterTypes.h"
 #include "GameFramework/Character.h"
 #include "LiseWan.generated.h"
 
 class UInputMappingContext;
 class UInputAction;
+class USpringArmComponent;
+class UCameraComponent;
 
 struct FInputActionValue;
+
 UCLASS()
 class PROJECTKUA_API ALiseWan : public ACharacter
 {
@@ -24,6 +28,8 @@ protected:
 	
 	virtual void BeginPlay() override;
 
+	ECharacterState CharacterState=ECharacterState::ECS_Notinteracted;
+	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Input")
 	UInputMappingContext* PlayerInputContext;
 
@@ -36,7 +42,19 @@ protected:
 	//** CALLBACKS FOR INPUTS **//
 	void Move(const FInputActionValue& value);
 	void Look(const FInputActionValue& value);
+
+	//** CAMERA PROPERTIES **//
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Camera Properties")
+	float CameraHeight=100;
+	
+	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Camera Properties")
+	float ArmLength=-1.0f;
 	
 private:	
 
+	UPROPERTY(VisibleAnywhere)
+	USpringArmComponent* CameraBoom;
+
+	UPROPERTY(VisibleAnywhere)
+	UCameraComponent* ViewCamera;
 };

@@ -1,13 +1,13 @@
 // Fill out your copyright notice in the Description page of Project Settings.
 
-
 #include "Characters/Player/LiseWan.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
-#include "EnhancedInputComponent.h"
 #include "InputActionValue.h"
 #include "Components/InputComponent.h"
-
+#include "GameFramework/CharacterMovementComponent.h"
+#include "GameFramework/SpringArmComponent.h"
+#include "Camera/CameraComponent.h"
 
 #include "DebugHelper.h"
 
@@ -20,12 +20,24 @@ ALiseWan::ALiseWan()
 	bUseControllerRotationPitch=false;
 	bUseControllerRotationYaw=false;
 	bUseControllerRotationRoll=false;
+	
+	GetCharacterMovement()->bOrientRotationToMovement = true;
+	GetCharacterMovement()->RotationRate=FRotator(0.f,400.f,0.f);
+	
+	CameraBoom=CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
+	CameraBoom->SetupAttachment(GetRootComponent());
+	
+	ViewCamera=CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
+	ViewCamera->SetupAttachment(CameraBoom);
 }
 
 // Called when the game starts or when spawned
 void ALiseWan::BeginPlay()
 {
 	Super::BeginPlay();
+	CameraBoom->TargetOffset=FVector(0.0f,0.0f,CameraHeight);
+	CameraBoom->TargetArmLength=ArmLength;
+	
 	APlayerController* PlayerController=Cast<APlayerController>(GetController());
 	if(PlayerController)
 	{
@@ -35,7 +47,6 @@ void ALiseWan::BeginPlay()
 		}
 	}
 }
-
 
 // Called every frame
 void ALiseWan::Tick(float DeltaTime)
@@ -56,6 +67,8 @@ void ALiseWan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 
 void ALiseWan::Move(const FInputActionValue& value)
 {
+	if (CharacterState!=ECharacterState::ECS_Notinteracted)return;
+	
 	const auto MovementVector=value.Get<FVector2D>();
 	const auto Rotation=Controller->GetControlRotation();
 
@@ -78,17 +91,12 @@ void ALiseWan::Look(const FInputActionValue& value)
 {
 	const auto LookAxisVector=value.Get<FVector2D>();
 
-	if (Controller!=nullptr)
+	if (Controller!=nullptr && LookAxisVector.X!=0)
 	{
-		if (LookAxisVector.X!=0)
-		{
-			AddControllerYawInput(LookAxisVector.X);
-		}
-		if (LookAxisVector.Y!=0)
-		{
-			AddControllerPitchInput(LookAxisVector.Y);
-
-			
-		}
+		AddControllerYawInput(LookAxisVector.X);
+	}
+	if (Controller!=nullptr && LookAxisVector.Y!=0)
+	{
+		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
