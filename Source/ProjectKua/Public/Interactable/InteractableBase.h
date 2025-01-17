@@ -20,6 +20,7 @@ public:
 	AInteractableBase();
 	virtual void Tick(float DeltaTime) override;
 	virtual void Interact_Implementation() override;
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -31,5 +32,5 @@ protected:
 
 private:
 	AActor* InteractedActor;
-	ECharacterState CharacterState=ECharacterState::ECS_Interacted;
+	FVector InitialPosition;
 };

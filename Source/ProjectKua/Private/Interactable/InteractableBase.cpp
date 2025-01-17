@@ -2,7 +2,6 @@
 
 
 #include "Interactable/InteractableBase.h"
-
 #include "Characters/Player/LiseWan.h"
 #include "Components/SphereComponent.h"
 
@@ -26,13 +25,12 @@ AInteractableBase::AInteractableBase()
 	OverlapComponent->SetCollisionResponseToChannel(ECC_Camera,ECR_Ignore);
 }
 
-
 void AInteractableBase::BeginPlay()
 {
 	Super::BeginPlay();
-	
-}
+	InitialPosition=GetActorLocation();
 
+}
 
 void AInteractableBase::Tick(float DeltaTime)
 {
@@ -41,14 +39,17 @@ void AInteractableBase::Tick(float DeltaTime)
 
 void AInteractableBase::Interact_Implementation()
 {
-	switch (CharacterState)
+    ALiseWan* LiseWan = Cast<ALiseWan>(GetWorld()->GetFirstPlayerController()->GetPawn());
+	if (LiseWan)
 	{
-	case ECharacterState::ECS_Interacted:
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "Interacting with this character!");
-		break;
-	case ECharacterState::ECS_Notinteracted:
-		GEngine->AddOnScreenDebugMessage(-1, 15.0f, FColor::Red, "Not interacting with this character!");
-		break;
+		switch (LiseWan->GetCharacterState())
+		{
+		case ECharacterState::ECS_Notinteracted:
+			SetActorLocation(FVector(GetActorLocation().X,GetActorLocation().Y,LiseWan->GetCameraHeight()+75.f));
+			break;
+		case ECharacterState::ECS_Interacted:
+			SetActorLocation(InitialPosition);
+			break;
+		}
 	}
 }
-

@@ -106,11 +106,6 @@ void ALiseWan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 	}
 }
 
-bool ALiseWan::InInteract()
-{
-	return CharacterState==ECharacterState::ECS_Notinteracted;
-}
-
 void ALiseWan::Move(const FInputActionValue& Value)
 {
 	if (CharacterState!=ECharacterState::ECS_Notinteracted)return;
@@ -168,13 +163,42 @@ void ALiseWan::Interact()
 			switch (CharacterState)
 			{
 			case ECharacterState::ECS_Interacted:
+				Interactable->Execute_Interact(InteractedActor);
 				CharacterState=ECharacterState::ECS_Notinteracted;
+				SetCharacterState(ECharacterState::ECS_Notinteracted);
 				break;
+				
 			case ECharacterState::ECS_Notinteracted:
 				Interactable->Execute_Interact(InteractedActor);
 				CharacterState=ECharacterState::ECS_Interacted;
+				SetCharacterState(ECharacterState::ECS_Interacted);
 				break;
 			}
 		}
 	}
+}
+
+float ALiseWan::GetCameraHeight() const
+{
+	return CameraHeight;
+}
+
+float ALiseWan::GetArmLength() const
+{
+	return  ArmLength;
+}
+
+void ALiseWan::SetCharacterState(ECharacterState State)
+{
+	CharacterState=State;
+}
+
+ECharacterState ALiseWan::GetCharacterState()
+{
+	return CharacterState;
+}
+
+bool ALiseWan::InInteract()
+{
+	return CharacterState==ECharacterState::ECS_Notinteracted;
 }

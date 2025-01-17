@@ -14,9 +14,7 @@ class UCameraComponent;
 class UCapsuleComponent;
 class USphereComponent;
 
-
 struct FInputActionValue;
-
 
 UCLASS()
 class PROJECTKUA_API ALiseWan : public ACharacter
@@ -27,8 +25,11 @@ public:
 	ALiseWan();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	FORCEINLINE float GetCameraHeight() const{return CameraHeight;}
-	FORCEINLINE float GetArmLength() const{return ArmLength;}
+	FORCEINLINE float GetCameraHeight() const;
+	FORCEINLINE float GetArmLength() const;
+
+	void SetCharacterState(ECharacterState State);
+	ECharacterState GetCharacterState();
 	bool InInteract();
 protected:
 	virtual void BeginPlay() override;
@@ -75,7 +76,6 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Camera Properties")
 	float ArmLength=-1.0f;
-
 	
 private:	
 
@@ -91,8 +91,5 @@ private:
 	UPROPERTY(EditAnywhere,Category="Overlap")
 	USphereComponent* OverlapSphere;
 
-	AActor* InteractedActor=nullptr;
-	
+	AActor* InteractedActor=nullptr;	
 };
-
-
