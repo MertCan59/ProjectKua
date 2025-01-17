@@ -8,8 +8,13 @@
 #include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 #include "Camera/CameraComponent.h"
+#include "Components/CapsuleComponent.h"
+#include "Components/SphereComponent.h"
+
+#include "Interfaces/Interactable.h"
 
 #include "DebugHelper.h"
+
 
 // Sets default values
 ALiseWan::ALiseWan()
@@ -29,12 +34,24 @@ ALiseWan::ALiseWan()
 	
 	ViewCamera=CreateDefaultSubobject<UCameraComponent>(TEXT("ViewCamera"));
 	ViewCamera->SetupAttachment(CameraBoom);
+
+	//PHYSIC CONTROL
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionResponseToAllChannels(ECR_Block);
+
+	// OVERLAP CONTROL 
+	OverlapSphere=CreateDefaultSubobject<USphereComponent>(TEXT("OverlapSphere"));
+	OverlapSphere->SetupAttachment(GetRootComponent());
+	OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
+	OverlapSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
+	OverlapSphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
 }
 
 // Called when the game starts or when spawned
 void ALiseWan::BeginPlay()
 {
 	Super::BeginPlay();
+	
 	CameraBoom->TargetOffset=FVector(0.0f,0.0f,CameraHeight);
 	CameraBoom->TargetArmLength=ArmLength;
 	
@@ -45,6 +62,29 @@ void ALiseWan::BeginPlay()
 		{
 			SubSystem->AddMappingContext(PlayerInputContext,0);
 		}
+	}
+	if (GetCapsuleComponent())
+	{
+		OverlapSphere->OnComponentBeginOverlap.AddDynamic(this,&ALiseWan::OnSphereOverlap);
+		OverlapSphere->OnComponentEndOverlap.AddDynamic(this,&ALiseWan::OnSphereOverlapEnd);
+	}
+}
+
+void ALiseWan::OnSphereOverlap(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex, bool bFromSweep, const FHitResult& SweepResult)
+{
+	if (OtherActor && OtherActor->Implements<UInteractable>())
+	{
+		InteractedActor = OtherActor;
+	}
+}
+
+void ALiseWan::OnSphereOverlapEnd(UPrimitiveComponent* OverlappedComponent, AActor* OtherActor,
+	UPrimitiveComponent* OtherComp, int32 OtherBodyIndex)
+{
+	if (InteractedActor == OtherActor)
+	{
+		InteractedActor = nullptr;
 	}
 }
 
@@ -64,6 +104,11 @@ void ALiseWan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnchancedComponent->BindAction(LookingAction,ETriggerEvent::Triggered,this,&ALiseWan::Look);
 		EnchancedComponent->BindAction(Interaction,ETriggerEvent::Started,this,&ALiseWan::Interact);
 	}
+}
+
+bool ALiseWan::InInteract()
+{
+	return CharacterState==ECharacterState::ECS_Notinteracted;
 }
 
 void ALiseWan::Move(const FInputActionValue& Value)
@@ -86,12 +131,24 @@ void ALiseWan::Move(const FInputActionValue& Value)
 	{
 		AddMovementInput(RightDirection,MovementVector.X);
 	}
+	const FVector Direction = (ForwardDirection * MovementVector.Y + RightDirection * MovementVector.X).GetSafeNormal();
+	if (!Direction.IsNearlyZero())
+	{
+		const FRotator TargetRotation = Direction.Rotation();
+		SetActorRotation(FRotator(0.f, TargetRotation.Yaw, 0.f));
+	}
 }
 
 void ALiseWan::Look(const FInputActionValue& Value)
 {
-	const auto LookAxisVector=Value.Get<FVector2D>();
-
+	auto LookAxisVector=Value.Get<FVector2D>();
+	auto CachedAxisVector=GetActorRotation();
+	
+	if (CharacterState!=ECharacterState::ECS_Notinteracted)
+	{
+		Controller->SetControlRotation(CachedAxisVector);
+		return;
+	}
 	if (Controller!=nullptr && LookAxisVector.X!=0)
 	{
 		AddControllerYawInput(LookAxisVector.X);
@@ -101,11 +158,23 @@ void ALiseWan::Look(const FInputActionValue& Value)
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
-void ALiseWan::Interact(const FInputActionValue& Value)
+void ALiseWan::Interact()
 {
-	if (GEngine)
+	if (InteractedActor)
 	{
-		GEngine->AddOnScreenDebugMessage(-1, 5, FColor::Red, "Interacting");
-		
+		IInteractable* Interactable = Cast<IInteractable>(InteractedActor);
+		if (Interactable)
+		{
+			switch (CharacterState)
+			{
+			case ECharacterState::ECS_Interacted:
+				CharacterState=ECharacterState::ECS_Notinteracted;
+				break;
+			case ECharacterState::ECS_Notinteracted:
+				Interactable->Execute_Interact(InteractedActor);
+				CharacterState=ECharacterState::ECS_Interacted;
+				break;
+			}
+		}
 	}
 }

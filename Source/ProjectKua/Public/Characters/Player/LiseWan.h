@@ -11,8 +11,12 @@ class UInputMappingContext;
 class UInputAction;
 class USpringArmComponent;
 class UCameraComponent;
+class UCapsuleComponent;
+class USphereComponent;
+
 
 struct FInputActionValue;
+
 
 UCLASS()
 class PROJECTKUA_API ALiseWan : public ACharacter
@@ -23,12 +27,30 @@ public:
 	ALiseWan();
 	virtual void Tick(float DeltaTime) override;
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
-	
+	FORCEINLINE float GetCameraHeight() const{return CameraHeight;}
+	FORCEINLINE float GetArmLength() const{return ArmLength;}
+	bool InInteract();
 protected:
-	
 	virtual void BeginPlay() override;
-
-	ECharacterState CharacterState=ECharacterState::ECS_Notinteracted;
+	
+	UFUNCTION()
+	void OnSphereOverlap(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex,
+		bool bFromSweep,
+		const FHitResult& SweepResult
+		);
+	
+	UFUNCTION()
+	 void OnSphereOverlapEnd(
+		UPrimitiveComponent* OverlappedComponent,
+		AActor* OtherActor,
+		UPrimitiveComponent* OtherComp,
+		int32 OtherBodyIndex
+		);
+	 ECharacterState CharacterState=ECharacterState::ECS_Notinteracted;
 	
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Input")
 	UInputMappingContext* PlayerInputContext;
@@ -45,7 +67,7 @@ protected:
 	//** CALLBACKS FOR INPUTS **//
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	void Interact(const FInputActionValue& Value);
+	void Interact();
 
 	//** CAMERA PROPERTIES **//
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Camera Properties")
@@ -53,6 +75,7 @@ protected:
 	
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Camera Properties")
 	float ArmLength=-1.0f;
+
 	
 private:	
 
@@ -61,6 +84,15 @@ private:
 
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* ViewCamera;
+
+	UPROPERTY(EditAnywhere,Category="Overlap")
+	UCapsuleComponent* OverlapComponent;
+	
+	UPROPERTY(EditAnywhere,Category="Overlap")
+	USphereComponent* OverlapSphere;
+
+	AActor* InteractedActor=nullptr;
+	
 };
 
 
