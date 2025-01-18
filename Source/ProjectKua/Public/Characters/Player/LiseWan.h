@@ -5,8 +5,10 @@
 #include "CoreMinimal.h"
 #include "Characters/CharacterTypes.h"
 #include "GameFramework/Character.h"
+
 #include "LiseWan.generated.h"
 
+class USceneComponent;
 class UInputMappingContext;
 class UInputAction;
 class USpringArmComponent;
@@ -30,7 +32,8 @@ public:
 
 	void SetCharacterState(ECharacterState State);
 	ECharacterState GetCharacterState();
-	bool InInteract();
+
+	FVector GetLocation()const;
 protected:
 	virtual void BeginPlay() override;
 	
@@ -64,10 +67,16 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Input")
 	UInputAction* Interaction;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Input")
+	UInputAction* RotateAction;
+
+	
 	
 	//** CALLBACKS FOR INPUTS **//
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
+	void Rotate(const FInputActionValue& Value);
 	void Interact();
 
 	//** CAMERA PROPERTIES **//
@@ -85,11 +94,14 @@ private:
 	UPROPERTY(VisibleAnywhere)
 	UCameraComponent* ViewCamera;
 
-	UPROPERTY(EditAnywhere,Category="Overlap")
+	UPROPERTY(VisibleAnywhere,Category="OverlapCapsule")
 	UCapsuleComponent* OverlapComponent;
 	
-	UPROPERTY(EditAnywhere,Category="Overlap")
+	UPROPERTY(VisibleAnywhere,Category="OverlapSphere")
 	USphereComponent* OverlapSphere;
-
+	
+	UPROPERTY(VisibleAnywhere,Category="Object Move Position")
+	USceneComponent* GetPositionToMove;
+	
 	AActor* InteractedActor=nullptr;	
 };

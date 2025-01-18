@@ -21,6 +21,8 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	virtual void Interact_Implementation() override;
 
+	void RotateInteractable(float YawInput,float PitchInput);
+
 protected:
 	virtual void BeginPlay() override;
 	
@@ -30,7 +32,14 @@ protected:
 	UPROPERTY(VisibleAnywhere,BlueprintReadOnly)
 	USphereComponent* OverlapComponent;
 
+	//** POLISHING VARIABLES **//
+	UPROPERTY(EditAnywhere,Category="Position Variables")
+	float ItemHeight;
+
 private:
 	AActor* InteractedActor;
 	FVector InitialPosition;
+	FRotator InitialRotation;
+	
+	FVector Position;
 };

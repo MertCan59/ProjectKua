@@ -10,11 +10,11 @@
 #include "Camera/CameraComponent.h"
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
-
+#include "Components/SceneComponent.h"
 #include "Interfaces/Interactable.h"
 
 #include "DebugHelper.h"
-
+#include "Interactable/InteractableBase.h"
 
 // Sets default values
 ALiseWan::ALiseWan()
@@ -45,13 +45,18 @@ ALiseWan::ALiseWan()
 	OverlapSphere->SetCollisionEnabled(ECollisionEnabled::QueryAndPhysics);
 	OverlapSphere->SetCollisionResponseToAllChannels(ECR_Ignore);
 	OverlapSphere->SetCollisionResponseToChannel(ECC_WorldDynamic, ECR_Overlap);
+
+	GetPositionToMove=CreateDefaultSubobject<USceneComponent>(TEXT("GetPositionToMove"));
+	GetPositionToMove->SetupAttachment(GetRootComponent());
 }
+
+
 
 // Called when the game starts or when spawned
 void ALiseWan::BeginPlay()
 {
 	Super::BeginPlay();
-	
+
 	CameraBoom->TargetOffset=FVector(0.0f,0.0f,CameraHeight);
 	CameraBoom->TargetArmLength=ArmLength;
 	
@@ -137,12 +142,17 @@ void ALiseWan::Move(const FInputActionValue& Value)
 void ALiseWan::Look(const FInputActionValue& Value)
 {
 	auto LookAxisVector=Value.Get<FVector2D>();
-	auto CachedAxisVector=GetActorRotation();
-	
-	if (CharacterState!=ECharacterState::ECS_Notinteracted)
+	if (CharacterState!=ECharacterState::ECS_Notinteracted && InteractedActor)
 	{
-		Controller->SetControlRotation(CachedAxisVector);
-		return;
+		AInteractableBase* Interactable=CastChecked<AInteractableBase>(InteractedActor);
+		if (Interactable && LookAxisVector.SizeSquared()>0)
+		{
+			if (Interactable && LookAxisVector.SizeSquared() > 0)
+			{
+				Interactable->RotateInteractable(-LookAxisVector.X,LookAxisVector.Y);
+			}
+			return;
+		}
 	}
 	if (Controller!=nullptr && LookAxisVector.X!=0)
 	{
@@ -153,6 +163,7 @@ void ALiseWan::Look(const FInputActionValue& Value)
 		AddControllerPitchInput(LookAxisVector.Y);
 	}
 }
+
 void ALiseWan::Interact()
 {
 	if (InteractedActor)
@@ -178,6 +189,8 @@ void ALiseWan::Interact()
 	}
 }
 
+
+
 float ALiseWan::GetCameraHeight() const
 {
 	return CameraHeight;
@@ -198,7 +211,7 @@ ECharacterState ALiseWan::GetCharacterState()
 	return CharacterState;
 }
 
-bool ALiseWan::InInteract()
+FVector ALiseWan::GetLocation() const
 {
-	return CharacterState==ECharacterState::ECS_Notinteracted;
+	return GetPositionToMove->GetComponentLocation();
 }
