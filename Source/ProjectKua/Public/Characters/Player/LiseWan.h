@@ -5,7 +5,9 @@
 #include "CoreMinimal.h"
 #include "Characters/CharacterTypes.h"
 #include "GameFramework/Character.h"
-
+#include "Interfaces/Interactable.h"
+#include "Interactable/InteractableBase.h"
+#include "Interfaces/Obtainable.h"
 #include "LiseWan.generated.h"
 
 class USceneComponent;
@@ -31,7 +33,7 @@ public:
 	FORCEINLINE float GetArmLength() const;
 
 	void SetCharacterState(ECharacterState State);
-	ECharacterState GetCharacterState();
+	ECharacterState GetCharacterState()const;
 
 	FVector GetLocation()const;
 protected:
@@ -67,16 +69,10 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Input")
 	UInputAction* Interaction;
-
-	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Input")
-	UInputAction* RotateAction;
-
-	
 	
 	//** CALLBACKS FOR INPUTS **//
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
-	void Rotate(const FInputActionValue& Value);
 	void Interact();
 
 	//** CAMERA PROPERTIES **//

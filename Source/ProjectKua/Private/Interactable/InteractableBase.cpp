@@ -40,7 +40,6 @@ void AInteractableBase::Tick(float DeltaTime)
 void AInteractableBase::Interact_Implementation()
 {
     ALiseWan* LiseWan = Cast<ALiseWan>(GetWorld()->GetFirstPlayerController()->GetPawn());
-	//const auto Rotation=GetActorRotation();
 	if (LiseWan)
 	{
 		auto CachedAxisVector=LiseWan->GetActorRotation();
@@ -48,7 +47,7 @@ void AInteractableBase::Interact_Implementation()
 		{
 		case ECharacterState::ECS_Notinteracted:
 			LiseWan->Controller->SetControlRotation(CachedAxisVector);
-			Position=UKismetMathLibrary::VLerp(GetActorLocation(),LiseWan->GetLocation(),.5f);
+			Position=UKismetMathLibrary::VLerp(GetActorLocation(),LiseWan->GetLocation(),.25f);
 			Position.Z=UKismetMathLibrary::Lerp(Position.Z,Position.Z+=ItemHeight,0.25);
 			SetActorLocation(Position);
 			SetActorRotation(LiseWan->GetActorRotation());
@@ -64,9 +63,8 @@ void AInteractableBase::RotateInteractable(float YawInput, float PitchInput)
 {
 	FQuat YawRotation = FQuat(FVector(0.f, 0.f, 1.f), FMath::DegreesToRadians(YawInput * 2.f));
 	FQuat PitchRotation = FQuat(FVector(1.f, 0.f, 0.f), FMath::DegreesToRadians(PitchInput * 2.f));
-
+	
 	FQuat CurrentRotation = GetActorQuat();
-
 	FQuat NewRotation = PitchRotation * CurrentRotation * YawRotation;
 	SetActorRotation(NewRotation);
 }

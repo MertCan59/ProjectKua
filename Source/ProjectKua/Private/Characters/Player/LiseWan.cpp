@@ -11,10 +11,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/SceneComponent.h"
-#include "Interfaces/Interactable.h"
 
 #include "DebugHelper.h"
-#include "Interactable/InteractableBase.h"
+
 
 // Sets default values
 ALiseWan::ALiseWan()
@@ -49,8 +48,6 @@ ALiseWan::ALiseWan()
 	GetPositionToMove=CreateDefaultSubobject<USceneComponent>(TEXT("GetPositionToMove"));
 	GetPositionToMove->SetupAttachment(GetRootComponent());
 }
-
-
 
 // Called when the game starts or when spawned
 void ALiseWan::BeginPlay()
@@ -169,27 +166,30 @@ void ALiseWan::Interact()
 	if (InteractedActor)
 	{
 		IInteractable* Interactable = Cast<IInteractable>(InteractedActor);
+		IObtainable* Obtainable=Cast<IObtainable>(InteractedActor);
 		if (Interactable)
 		{
-			switch (CharacterState)
+			if (!Obtainable)
 			{
-			case ECharacterState::ECS_Interacted:
-				Interactable->Execute_Interact(InteractedActor);
-				CharacterState=ECharacterState::ECS_Notinteracted;
-				SetCharacterState(ECharacterState::ECS_Notinteracted);
-				break;
+				switch (CharacterState)
+				{
+				case ECharacterState::ECS_Interacted:
+					Interactable->Execute_Interact(InteractedActor);
+					SetCharacterState(ECharacterState::ECS_Notinteracted);
+					break;
 				
-			case ECharacterState::ECS_Notinteracted:
-				Interactable->Execute_Interact(InteractedActor);
-				CharacterState=ECharacterState::ECS_Interacted;
-				SetCharacterState(ECharacterState::ECS_Interacted);
-				break;
+				case ECharacterState::ECS_Notinteracted:
+					Interactable->Execute_Interact(InteractedActor);
+					SetCharacterState(ECharacterState::ECS_Interacted);
+					break;
+				}
+			}else
+			{
+				Obtainable->Execute_AddToInventory(InteractedActor);
 			}
 		}
 	}
 }
-
-
 
 float ALiseWan::GetCameraHeight() const
 {
@@ -206,7 +206,7 @@ void ALiseWan::SetCharacterState(ECharacterState State)
 	CharacterState=State;
 }
 
-ECharacterState ALiseWan::GetCharacterState()
+ECharacterState ALiseWan::GetCharacterState()const
 {
 	return CharacterState;
 }
