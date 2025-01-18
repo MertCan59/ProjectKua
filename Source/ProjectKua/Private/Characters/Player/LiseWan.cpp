@@ -49,6 +49,7 @@ ALiseWan::ALiseWan()
 	GetPositionToMove->SetupAttachment(GetRootComponent());
 }
 
+
 // Called when the game starts or when spawned
 void ALiseWan::BeginPlay()
 {
@@ -144,6 +145,7 @@ void ALiseWan::Look(const FInputActionValue& Value)
 		AInteractableBase* Interactable=CastChecked<AInteractableBase>(InteractedActor);
 		if (Interactable && LookAxisVector.SizeSquared()>0)
 		{
+			
 			if (Interactable && LookAxisVector.SizeSquared() > 0)
 			{
 				Interactable->RotateInteractable(-LookAxisVector.X,LookAxisVector.Y);

@@ -47,8 +47,8 @@ void AInteractableBase::Interact_Implementation()
 		{
 		case ECharacterState::ECS_Notinteracted:
 			LiseWan->Controller->SetControlRotation(CachedAxisVector);
-			Position=UKismetMathLibrary::VLerp(GetActorLocation(),LiseWan->GetLocation(),.25f);
-			Position.Z=UKismetMathLibrary::Lerp(Position.Z,Position.Z+=ItemHeight,0.25);
+			Position=UKismetMathLibrary::VLerp(LiseWan->GetLocation(),GetActorLocation(),.25f);
+			Position.Z=UKismetMathLibrary::Lerp(Position.Z+ItemHeight,Position.Z,0.25);
 			SetActorLocation(Position);
 			SetActorRotation(LiseWan->GetActorRotation());
 			break;
