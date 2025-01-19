@@ -36,7 +36,6 @@ void AInteractableBase::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-
 void AInteractableBase::Interact_Implementation()
 {
     ALiseWan* LiseWan = Cast<ALiseWan>(GetWorld()->GetFirstPlayerController()->GetPawn());

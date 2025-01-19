@@ -11,9 +11,9 @@
 #include "Components/CapsuleComponent.h"
 #include "Components/SphereComponent.h"
 #include "Components/SceneComponent.h"
+#include "Inventory/Inventory.h"
 
 #include "DebugHelper.h"
-
 
 // Sets default values
 ALiseWan::ALiseWan()
@@ -47,8 +47,9 @@ ALiseWan::ALiseWan()
 
 	GetPositionToMove=CreateDefaultSubobject<USceneComponent>(TEXT("GetPositionToMove"));
 	GetPositionToMove->SetupAttachment(GetRootComponent());
-}
 
+	Inventory=CreateDefaultSubobject<UInventory>(TEXT("Inventory"));
+}
 
 // Called when the game starts or when spawned
 void ALiseWan::BeginPlay()
@@ -106,6 +107,7 @@ void ALiseWan::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 		EnchancedComponent->BindAction(MovementAction,ETriggerEvent::Triggered,this,&ALiseWan::Move);
 		EnchancedComponent->BindAction(LookingAction,ETriggerEvent::Triggered,this,&ALiseWan::Look);
 		EnchancedComponent->BindAction(Interaction,ETriggerEvent::Started,this,&ALiseWan::Interact);
+		EnchancedComponent->BindAction(InventoryUsing,ETriggerEvent::Started,this,&ALiseWan::UseInventory);
 	}
 }
 
@@ -187,9 +189,24 @@ void ALiseWan::Interact()
 				}
 			}else
 			{
-				Obtainable->Execute_AddToInventory(InteractedActor);
+				IObtainable* ObtainedObject=Cast<IObtainable>(InteractedActor);
+				if (ObtainedObject)
+				{
+					ObtainedObject->Execute_AddToInventory(InteractedActor);
+					InventoredItem=InteractedActor;
+				}
 			}
 		}
+	}
+}
+
+void ALiseWan::UseInventory()
+{
+	IObtainable* ObtainedObject=Cast<IObtainable>(InventoredItem);
+	if (Inventory && ObtainedObject)
+	{
+		Inventory->GetFromInventory(ObtainedObject);
+		InventoredItem=nullptr;
 	}
 }
 
@@ -201,6 +218,11 @@ float ALiseWan::GetCameraHeight() const
 float ALiseWan::GetArmLength() const
 {
 	return  ArmLength;
+}
+
+UInventory* ALiseWan::GetInventory()
+{
+	return Inventory;
 }
 
 void ALiseWan::SetCharacterState(ECharacterState State)

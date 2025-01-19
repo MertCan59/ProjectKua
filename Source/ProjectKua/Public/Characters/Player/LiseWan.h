@@ -8,6 +8,7 @@
 #include "Interfaces/Interactable.h"
 #include "Interactable/InteractableBase.h"
 #include "Interfaces/Obtainable.h"
+
 #include "LiseWan.generated.h"
 
 class USceneComponent;
@@ -17,6 +18,7 @@ class USpringArmComponent;
 class UCameraComponent;
 class UCapsuleComponent;
 class USphereComponent;
+class UInventory;
 
 struct FInputActionValue;
 
@@ -31,6 +33,7 @@ public:
 	virtual void SetupPlayerInputComponent(UInputComponent* PlayerInputComponent) override;
 	FORCEINLINE float GetCameraHeight() const;
 	FORCEINLINE float GetArmLength() const;
+	FORCEINLINE UInventory* GetInventory();
 
 	void SetCharacterState(ECharacterState State);
 	ECharacterState GetCharacterState()const;
@@ -69,11 +72,17 @@ protected:
 
 	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Input")
 	UInputAction* Interaction;
+
+	UPROPERTY(EditAnywhere,BlueprintReadOnly,Category="Input")
+	UInputAction* InventoryUsing;
+
+	
 	
 	//** CALLBACKS FOR INPUTS **//
 	void Move(const FInputActionValue& Value);
 	void Look(const FInputActionValue& Value);
 	void Interact();
+	void UseInventory();
 
 	//** CAMERA PROPERTIES **//
 	UPROPERTY(EditDefaultsOnly,BlueprintReadOnly,Category="Camera Properties")
@@ -99,5 +108,14 @@ private:
 	UPROPERTY(VisibleAnywhere,Category="Object Move Position")
 	USceneComponent* GetPositionToMove;
 	
-	AActor* InteractedActor=nullptr;	
+	UPROPERTY(VisibleAnywhere)
+	AActor* InteractedActor=nullptr;
+	
+	UPROPERTY(VisibleAnywhere)
+	AActor* InventoredItem=nullptr;
+
+	
+
+	UPROPERTY(VisibleAnywhere)
+	UInventory* Inventory;
 };
